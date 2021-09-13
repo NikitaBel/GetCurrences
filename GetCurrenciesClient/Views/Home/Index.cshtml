@@ -1,0 +1,217 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div>
+
+    <div class="form-group">
+        <button class="btn-default" id="GetAll">Получить все валюты</button>
+    </div>
+
+
+    <div class="form-group">
+        <label>Выберите валюту</label>
+        <div class="col-md-10">
+            @Html.DropDownList("CurrencyID", ViewBag.Currency, "", htmlAttributes: new { @class = "form-control", @id = "CurrencyID" })
+        </div>
+        <button class="btn-default" id="GetSelected">Получить выбранную валюту валюты</button>
+    </div>
+
+    <button class="btn-default" id="Previos" value="1">Предыдущая страница</button>
+    <button class="btn-default" id="Next" value="3">Следующая страница</button>
+
+    <table class="table table-bordered" id="ResultTable">
+        <thead>
+            <tr>
+                <th>
+                    NumCode
+                </th>
+                <th>
+                    Nominal
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Value
+                </th>
+                <th>
+                    Previous
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function ClearTable() {
+                var table = document.getElementById("ResultTable");
+                while (table.rows.length > 1) {
+                    table.deleteRow(1);
+                }
+            }
+
+
+            $("#GetAll").click(function () {
+                $.ajax({
+                    type: 'Get',
+                    url: 'Values/currencies/2&-1',                    
+                    contentType: 'application/json',
+                    success: function (data) {
+                        ClearTable();
+                        
+
+                        data.currencies.forEach(function (element) {
+                            var row = "<tr>";
+                            row += "<td>";
+                            row += element.numCode;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.nominal;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.name;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.value;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.previous;
+                            row += "</td>";
+                            row += "</tr>";
+                            $("#ResultTable tbody").append(row);
+                        });
+                    }
+                })
+            })
+
+            $("#GetSelected").click(function () {
+                var ID = $("#CurrencyID").val();
+                $.ajax({
+                    type: 'Get',
+                    data: ID,
+                    url: 'Values/currency/' + ID,
+                    contentType: 'application/json',
+                    success: function (data) {
+
+                        ClearTable();
+
+                        var row = "<tr>";
+                        row += "<td>";
+                        row += data.numCode;
+                        row += "</td>";
+                        row += "<td>";
+                        row += data.nominal;
+                        row += "</td>";
+                        row += "<td>";
+                        row += data.name;
+                        row += "</td>";
+                        row += "<td>";
+                        row += data.value;
+                        row += "</td>";
+                        row += "<td>";
+                        row += data.previous;
+                        row += "</td>";
+                        row += "</tr>";
+                        $("#ResultTable tbody").append(row);
+                    }
+                })
+            })
+
+            $("#Next").click(function () {
+                var next = document.getElementById("Next")
+                var prev = document.getElementById("Previos");
+
+                var data = { pageNumber:$("#Next").val() , sign:1};
+
+                $.ajax({
+                    type: 'Get',
+                    url: 'Values/currencies/' + next.getAttribute("value")+'&1',
+                    contentType: 'application/json',
+                    data: data,
+                    success: function (data) {
+                        ClearTable();
+
+                        data.currencies.forEach(function (element) {
+                            var row = "<tr>";
+                            row += "<td>";
+                            row += element.numCode;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.nominal;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.name;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.value;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.previous;
+                            row += "</td>";
+                            row += "</tr>";
+                            $("#ResultTable tbody").append(row);
+                        });
+                        
+                        next.setAttribute("value", data.nextPage);
+                       
+                        prev.setAttribute("value", data.previousPage);
+                    }
+                })
+            })
+
+            $("#Previos").click(function () {
+                var next = document.getElementById("Next")
+                var prev = document.getElementById("Previos");
+
+                var data = { pageNumber: $("#Previos").val(), sign:1 };
+
+
+                $.ajax({
+                    type: 'Get',
+                    url: 'Values/currencies/' + prev.getAttribute("value") + '&1',
+                    contentType: 'application/json',
+                    data: data,
+                    success: function (data) {
+                        ClearTable();
+
+                        data.currencies.forEach(function (element) {
+                            var row = "<tr>";
+                            row += "<td>";
+                            row += element.numCode;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.nominal;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.name;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.value;
+                            row += "</td>";
+                            row += "<td>";
+                            row += element.previous;
+                            row += "</td>";
+                            row += "</tr>";
+                            $("#ResultTable tbody").append(row);
+                        });
+
+                        next.setAttribute("value", data.nextPage);
+
+                        prev.setAttribute("value", data.previousPage);
+                    }
+                })
+            })
+
+
+
+
+        })
+
+
+    </script>
+}
